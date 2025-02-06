@@ -102,18 +102,14 @@
             <td>RX</td>
         </tr>
     </tbody>
-</table>
+</table>!
 
-<h2>How It Works</h2>
-<ol>
-    <li>The ultrasonic sensor measures the distance to the top of the waste in the bin.</li>
-    <li>When the waste level reaches a predefined threshold, the Arduino triggers the GSM module.</li>
-    <li>The GSM module sends an SMS notification to the designated phone number.</li>
     <li>The user receives a message indicating that the dustbin is nearly full and needs to be emptied.</li>
 </ol>
 
 </body>
 </html>
 
+![Prototype image-1](https://github.com/user-attachments/assets/2dee6875-f009-4ada-abe7-af68e33c6c3a)
 
 ![photo-collage png](https://github.com/user-attachments/assets/e4eab5a5-0595-45c6-9958-b4f11420db39)
