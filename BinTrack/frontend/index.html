@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BinTrack - Smart Dustbin Monitor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+
+    <div class="container">
+      <h1>🚮 BinTrack - Smart Dustbin Monitor</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Dustbin No</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="dustbin-status">
+          <tr>
+            <td>001</td>
+            <td id="dustbin-status-001">Loading...</td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>003</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>004</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>005</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>006</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>006</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>007</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>008</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>009</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+          <tr>
+            <td>010</td>
+            <td class="status not-filled">❌ Not Filled</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        * Status will update automatically once hardware is connected.
+      </p>
+    </div>
+    <!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCzi2IsDsZE5WIA7KpDgS-0RFs6vxSDqDY",
+    authDomain: "brave-design-417105.firebaseapp.com",
+    databaseURL: "https://brave-design-417105-default-rtdb.firebaseio.com",
+    projectId: "brave-design-417105",
+    storageBucket: "brave-design-417105.appspot.com",
+    messagingSenderId: "218139478751",
+    appId: "1:218139478751:web:a8a36aeab810976906b76a"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const dustbinRef = db.ref("dustbins/001/filled");
+
+  console.log("Listening to DB updates...");
+
+  dustbinRef.on("value", (snapshot) => {
+    const filled = snapshot.val();
+    console.log("Firebase dustbin filled status:", filled); 
+    const statusElement = document.getElementById("dustbin-status-001");
+
+    if (filled) {
+      statusElement.textContent = "✅ Filled";
+      statusElement.className = "status filled";
+    } else {
+      statusElement.textContent = "❌ Not Filled";
+      statusElement.className = "status not-filled";
+    }
+  });
+</script>
+
+  </body>
+</html>
