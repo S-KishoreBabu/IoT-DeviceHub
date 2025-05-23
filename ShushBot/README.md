@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/9434decc-9ad4-46f7-8710-9128e38aba8b
+
   <h1>Sound Level Monitor 🎙️</h1>
     <p><strong>Sound Level Monitor</strong> is an IoT-based project that detects increased sound levels in a room. When the sound level crosses a predefined threshold, the system uses a speaker to play the message <strong>"Don't Shout."</strong> This project is ideal for maintaining a peaceful environment in spaces like libraries, study rooms, or offices.</p>
     
