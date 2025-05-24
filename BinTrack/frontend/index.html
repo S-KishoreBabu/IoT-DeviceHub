@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
- 
+
 
     <div class="container">
       <h1>🚮 BinTrack - Smart Dustbin Monitor</h1>
@@ -15,65 +15,86 @@
         <thead>
           <tr>
             <th>Dustbin No</th>
+            <th>Address</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="dustbin-status">
+        <tbody>
           <tr>
             <td>001</td>
-            <td id="dustbin-status-001">Loading...</td>
+            <td>My Classroom</td>
+            <td id="table-status-001">Loading...</td>
           </tr>
           <tr>
             <td>002</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Canteen</td>
+            <td id="table-status-002">Loading...</td>
           </tr>
           <tr>
             <td>003</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Parking 1</td>
+            <td id="table-status-003">Loading...</td>
           </tr>
           <tr>
             <td>004</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Parking 2</td>
+            <td id="table-status-004">Loading...</td>
           </tr>
           <tr>
             <td>005</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Boys Hostel</td>
+            <td id="table-status-005">Loading...</td>
           </tr>
           <tr>
             <td>006</td>
-            <td class="status not-filled">❌ Not Filled</td>
-          </tr>
-          <tr>
-            <td>006</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Girls Hostel</td>
+            <td id="table-status-006">Loading...</td>
           </tr>
           <tr>
             <td>007</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Caffe</td>
+            <td id="table-status-007">Loading...</td>
           </tr>
           <tr>
             <td>008</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>A Block</td>
+            <td id="table-status-008">Loading...</td>
           </tr>
           <tr>
             <td>009</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>B block</td>
+            <td id="table-status-009">Loading...</td>
           </tr>
           <tr>
             <td>010</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>C Block</td>
+            <td id="table-status-010">Loading...</td>
           </tr>
         </tbody>
       </table>
-      <p class="note">
-        * Status will update automatically once hardware is connected.
-      </p>
     </div>
-    <!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+
+    <div id="map-view" class="tab-view">
+      <p>Map integration will be added soon...</p>
+    </div>
+  </div>
 
 <script>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-view').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+
+<!-- Firebase & Dustbin Script -->
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+<script>
+  const greenBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-green.png";
+  const redBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-red.png";
+
   const firebaseConfig = {
     apiKey: "AIzaSyCzi2IsDsZE5WIA7KpDgS-0RFs6vxSDqDY",
     authDomain: "brave-design-417105.firebaseapp.com",
@@ -84,28 +105,32 @@
     appId: "1:218139478751:web:a8a36aeab810976906b76a"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   const dustbinRef = db.ref("dustbins/001/filled");
 
-  console.log("Listening to DB updates...");
-
   dustbinRef.on("value", (snapshot) => {
     const filled = snapshot.val();
-    console.log("Firebase dustbin filled status:", filled); 
     const statusElement = document.getElementById("dustbin-status-001");
+    const imageElement = document.getElementById("dustbin-img-001");
+    const tableStatus = document.getElementById("table-status-001");
 
     if (filled) {
-      statusElement.textContent = "✅ Filled";
+      statusElement.textContent = "Filled";
       statusElement.className = "status filled";
+      imageElement.src = redBin;
+      tableStatus.textContent = "Filled";
+      tableStatus.style.color = "red";
     } else {
-      statusElement.textContent = "❌ Not Filled";
+      statusElement.textContent = "Not Filled";
       statusElement.className = "status not-filled";
+      imageElement.src = greenBin;
+      tableStatus.textContent = "Not Filled";
+      tableStatus.style.color = "green";
     }
   });
 </script>
 
-  </body>
+</body>
 </html>
