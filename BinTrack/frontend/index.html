@@ -1,79 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BinTrack - Smart Dustbin Monitor</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BinTrack - Smart Dustbin Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
 
+    .sidebar {
+      width: 200px;
+      background-color: #2c3e50;
+      color: white;
+      height: 100vh;
+      padding-top: 20px;
+      position: fixed;
+    }
 
-    <div class="container">
-      <h1>🚮 BinTrack - Smart Dustbin Monitor</h1>
+    .sidebar button {
+      width: 100%;
+      padding: 15px;
+      background: none;
+      border: none;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background-color: #34495e;
+    }
+
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .dustbin-card {
+      width: 150px;
+      padding: 10px;
+      background-color: #ecf0f1;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .dustbin-card img {
+      width: 100px;
+      height: auto;
+    }
+
+    .status.filled {
+      color: red;
+    }
+
+    .status.not-filled {
+      color: green;
+    }
+
+    #table-view table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #table-view th, #table-view td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    .tab-view {
+      display: none;
+    }
+
+    .tab-view.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <button onclick="showTab('grid-view')">🗑️ Grid View</button>
+    <button onclick="showTab('table-view')">📋 Table View</button>
+    <button onclick="showTab('map-view')">🗺️ Map View</button>
+  </div>
+
+  <div class="content">
+    <h1>Smart Dustbin Monitor</h1>
+
+    <div id="grid-view" class="tab-view active">
+      <div class="grid">
+        <!-- Dustbin cards -->
+        <div class="dustbin-card">
+          <img id="dustbin-img-001" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png" alt="Dustbin">
+          <div class="dustbin-id">001</div>
+          <div class="dustbin-detail" id="dustbin-status-001">Loading...</div>
+        </div>
+        <div class="dustbin-card">
+          <img id="dustbin-img-002" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">002</div>
+          <div class="dustbin-detail" id="dustbin-status-002">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-003" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">003</div>
+          <div class="dustbin-detail" id="dustbin-status-003">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-004" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">004</div>
+          <div class="dustbin-detail" id="dustbin-status-004">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img  id="dustbin-img-005" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">005</div>
+          <div class="dustbin-detail" id="dustbin-status-005">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img  id="dustbin-img-006" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">006</div>
+          <div class="dustbin-detail" id="dustbin-status-006">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-007" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">007</div>
+          <div class="dustbin-detail" id="dustbin-status-007">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-008" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">008</div>
+          <div class="dustbin-detail" id="dustbin-status-008">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-009" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">009</div>
+          <div class="dustbin-detail" id="dustbin-status-009">Not Filled</div>
+        </div>
+
+        <div class="dustbin-card">
+          <img id="dustbin-img-010" src="https://ik.imagekit.io/khfpxrcgz/dustbin-green.png?updatedAt=1748065493153" alt="Dustbin">
+          <div class="dustbin-id">010</div>
+          <div class="dustbin-detail" id="dustbin-status-010">Not Filled</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="table-view" class="tab-view">
       <table>
         <thead>
           <tr>
             <th>Dustbin No</th>
+            <th>Address</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="dustbin-status">
+        <tbody>
           <tr>
             <td>001</td>
-            <td id="dustbin-status-001">Loading...</td>
+            <td>My Classroom</td>
+            <td id="table-status-001">Loading...</td>
           </tr>
           <tr>
             <td>002</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Canteen</td>
+            <td id="table-status-002">Loading...</td>
           </tr>
           <tr>
             <td>003</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Parking 1</td>
+            <td id="table-status-003">Loading...</td>
           </tr>
           <tr>
             <td>004</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Parking 2</td>
+            <td id="table-status-004">Loading...</td>
           </tr>
           <tr>
             <td>005</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Boys Hostel</td>
+            <td id="table-status-005">Loading...</td>
           </tr>
           <tr>
             <td>006</td>
-            <td class="status not-filled">❌ Not Filled</td>
-          </tr>
-          <tr>
-            <td>006</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Girls Hostel</td>
+            <td id="table-status-006">Loading...</td>
           </tr>
           <tr>
             <td>007</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>Caffe</td>
+            <td id="table-status-007">Loading...</td>
           </tr>
           <tr>
             <td>008</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>A Block</td>
+            <td id="table-status-008">Loading...</td>
           </tr>
           <tr>
             <td>009</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>B block</td>
+            <td id="table-status-009">Loading...</td>
           </tr>
           <tr>
             <td>010</td>
-            <td class="status not-filled">❌ Not Filled</td>
+            <td>C Block</td>
+            <td id="table-status-010">Loading...</td>
           </tr>
         </tbody>
       </table>
-      <p class="note">
-        * Status will update automatically once hardware is connected.
-      </p>
     </div>
-    <!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+
+    <div id="map-view" class="tab-view">
+      <p>Map integration will be added soon...</p>
+    </div>
+  </div>
 
 <script>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-view').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+
+<!-- Firebase & Dustbin Script -->
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+<script>
+  const greenBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-green.png";
+  const redBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-red.png";
+
   const firebaseConfig = {
     apiKey: "AIzaSyCzi2IsDsZE5WIA7KpDgS-0RFs6vxSDqDY",
     authDomain: "brave-design-417105.firebaseapp.com",
@@ -84,28 +258,32 @@
     appId: "1:218139478751:web:a8a36aeab810976906b76a"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   const dustbinRef = db.ref("dustbins/001/filled");
 
-  console.log("Listening to DB updates...");
-
   dustbinRef.on("value", (snapshot) => {
     const filled = snapshot.val();
-    console.log("Firebase dustbin filled status:", filled); 
     const statusElement = document.getElementById("dustbin-status-001");
+    const imageElement = document.getElementById("dustbin-img-001");
+    const tableStatus = document.getElementById("table-status-001");
 
     if (filled) {
-      statusElement.textContent = "✅ Filled";
+      statusElement.textContent = "Filled";
       statusElement.className = "status filled";
+      imageElement.src = redBin;
+      tableStatus.textContent = "Filled";
+      tableStatus.style.color = "red";
     } else {
-      statusElement.textContent = "❌ Not Filled";
+      statusElement.textContent = "Not Filled";
       statusElement.className = "status not-filled";
+      imageElement.src = greenBin;
+      tableStatus.textContent = "Not Filled";
+      tableStatus.style.color = "green";
     }
   });
 </script>
 
-  </body>
+</body>
 </html>
