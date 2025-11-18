@@ -128,8 +128,22 @@
     }
 
     #table-view tr:hover {
-      background-color: #f1f3f5;3
+      background-color: #f1f3f5;
     }
+
+    #map-view {
+      width: 100%;
+      height: 600px;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+
 
     .tab-view {
       display: none;
@@ -150,6 +164,7 @@
     <button onclick="showTab('grid-view')">Grid View</button>
     <button onclick="showTab('table-view')">Table View</button>
     <button onclick="showTab('map-view')">Map View</button>
+    
   </div>
 
   <div class="content">
@@ -289,16 +304,21 @@ Cleaner cities start with smarter monitoring.</p>
     </div>
 
     <div id="map-view" class="tab-view">
-      <p>Map integration will be added soon...</p>
+      <div id="map"></div>
     </div>
+
   </div>
 
 <script>
   function showTab(tabId) {
-    document.querySelectorAll('.tab-view').forEach(tab => {
+      document.querySelectorAll('.tab-view').forEach(tab => {
       tab.classList.remove('active');
     });
     document.getElementById(tabId).classList.add('active');
+
+    if (tabId === "map-view") {
+        setTimeout(() => initMap(), 200); // Important
+    }
   }
 </script>
 
@@ -344,7 +364,80 @@ Cleaner cities start with smarter monitoring.</p>
       tableStatus.style.color = "green";
     }
   });
+  function updateMapMarkers(locations) {
+  Object.keys(locations).forEach(id => {
+    const dustbin = locations[id];
+
+    new google.maps.Marker({
+      position: { lat: dustbin.lat, lng: dustbin.lng },
+      map: map,
+      label: id,
+      icon: dustbin.filled
+        ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+        : "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+    });
+  });
+}
+
+  const dustbinsRef = ref(db, "dustbins");
+
+  onValue(dustbinsRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log("🔥 Fetched dustbin data:", data);
+
+    // Convert to format like your dustbinLocations object
+    const dustbinLocations = {};
+
+    Object.keys(data).forEach((id) => {
+      dustbinLocations[id] = {
+        lat: data[id].lat,
+        lng: data[id].lng,
+        filled: data[id].filled,
+        name: `Dustbin ${id}`
+      };
+    });
+
+    console.log("🎯 Final dustbinLocations:", dustbinLocations);
+
+    // Here you can call your map marker function
+    updateMapMarkers(dustbinLocations);
+  });
+
+  let map;
+
+  // Dustbin GPS Locations (add your actual coordinates)
+  
+
+  
+  // Add markers based on dustbin status
+  function loadMapMarkers() {
+    Object.keys(dustbinLocations).forEach(id => {
+      firebase.database().ref(`dustbins/${id}/filled`).on("value", snapshot => {
+        const filled = snapshot.val();
+        const loc = dustbinLocations[id];
+
+        new google.maps.Marker({
+          position: { lat: loc.lat, lng: loc.lng },
+          map: map,
+          title: `${id} - ${loc.name}`,
+          icon: filled
+            ? "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            : "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
+        });
+      });
+    });
+  }
+  function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 11.018, lng: 76.955 },
+      zoom: 16,
+    });
+
+    loadMapMarkers();
+  }
+
 </script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBszl7IDU_I-hIJBVwSyAxrZXwpt23kyZg&callback=initMap" defer loading="async"></script>
 </body>
 </html>

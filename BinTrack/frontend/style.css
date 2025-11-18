@@ -1,0 +1,28 @@
+#map{
+    position: relative;
+}
+
+
+#pin1{
+    top: 350px;
+    left: 135px;
+}
+
+#pin2{
+    top: 525px;
+    left: 110px;
+}
+
+#pin3{
+    top: 415px;
+    left: 110px;
+}
+
+.map-pin{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgb(206, 255, 197);
+    border:solid 3px green;
+    border-radius: 50%;
+}

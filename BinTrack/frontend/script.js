@@ -32,3 +32,5 @@ onValue(dustbinRef, (snapshot) => {
     statusElement.className = "status not-filled";
   }
 });
+
+
