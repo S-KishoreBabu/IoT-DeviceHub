@@ -341,6 +341,7 @@ Cleaner cities start with smarter monitoring.</p>
 
   firebase.initializeApp(firebaseConfig);
   // Using compat version only (no mixing)
+  const truckLocation = { lat: 11.0185, lng: 76.9545 }; // example
   const db = firebase.database();
 
   let map; 
@@ -408,7 +409,12 @@ Cleaner cities start with smarter monitoring.</p>
       center: { lat: 11.018, lng: 76.955 },
       zoom: 16,
     });
-
+    truckMarker = new google.maps.Marker({
+      position: truckLocation,
+      map: map,
+      icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+      title: "Waste Collection Truck"
+    });
     updateMapMarkers(); // Load markers
   }
 
