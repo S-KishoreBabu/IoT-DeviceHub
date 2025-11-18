@@ -340,101 +340,78 @@ Cleaner cities start with smarter monitoring.</p>
   };
 
   firebase.initializeApp(firebaseConfig);
+  // Using compat version only (no mixing)
   const db = firebase.database();
 
-  const dustbinRef = db.ref("dustbins/001/filled");
+  let map; 
+  let dustbinLocations = {}; 
+  let markers = {}; 
 
-  dustbinRef.on("value", (snapshot) => {
+  // For left dashboard UI (single dustbin)
+  db.ref("dustbins/001/filled").on("value", (snapshot) => {
     const filled = snapshot.val();
-    const statusElement = document.getElementById("dustbin-status-001");
-    const imageElement = document.getElementById("dustbin-img-001");
-    const tableStatus = document.getElementById("table-status-001");
 
-    if (filled) {
-      statusElement.textContent = "Filled";
-      statusElement.className = "status filled";
-      imageElement.src = redBin;
-      tableStatus.textContent = "Filled";
-      tableStatus.style.color = "red";
-    } else {
-      statusElement.textContent = "Not Filled";
-      statusElement.className = "status not-filled";
-      imageElement.src = greenBin;
-      tableStatus.textContent = "Not Filled";
-      tableStatus.style.color = "green";
-    }
+    document.getElementById("dustbin-status-001").textContent =
+      filled ? "Filled" : "Not Filled";
+
+    document.getElementById("dustbin-img-001").src =
+      filled ? redBin : greenBin;
+
+    document.getElementById("table-status-001").textContent =
+      filled ? "Filled" : "Not Filled";
+
+    document.getElementById("table-status-001").style.color =
+      filled ? "red" : "green";
   });
-  function updateMapMarkers(locations) {
-  Object.keys(locations).forEach(id => {
-    const dustbin = locations[id];
 
-    new google.maps.Marker({
-      position: { lat: dustbin.lat, lng: dustbin.lng },
-      map: map,
-      label: id,
-      icon: dustbin.filled
-        ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-        : "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-    });
-  });
-}
 
-  const dustbinsRef = ref(db, "dustbins");
-
-  onValue(dustbinsRef, (snapshot) => {
+  // Load all dustbins (for map)
+  db.ref("dustbins").on("value", (snapshot) => {
     const data = snapshot.val();
-    console.log("🔥 Fetched dustbin data:", data);
 
-    // Convert to format like your dustbinLocations object
-    const dustbinLocations = {};
+    dustbinLocations = {};
 
     Object.keys(data).forEach((id) => {
       dustbinLocations[id] = {
         lat: data[id].lat,
         lng: data[id].lng,
-        filled: data[id].filled,
-        name: `Dustbin ${id}`
+        filled: data[id].filled
       };
     });
 
-    console.log("🎯 Final dustbinLocations:", dustbinLocations);
-
-    // Here you can call your map marker function
-    updateMapMarkers(dustbinLocations);
+    updateMapMarkers();
   });
 
-  let map;
 
-  // Dustbin GPS Locations (add your actual coordinates)
-  
-
-  
-  // Add markers based on dustbin status
-  function loadMapMarkers() {
+  function updateMapMarkers() {
     Object.keys(dustbinLocations).forEach(id => {
-      firebase.database().ref(`dustbins/${id}/filled`).on("value", snapshot => {
-        const filled = snapshot.val();
-        const loc = dustbinLocations[id];
+      const d = dustbinLocations[id];
 
-        new google.maps.Marker({
-          position: { lat: loc.lat, lng: loc.lng },
-          map: map,
-          title: `${id} - ${loc.name}`,
-          icon: filled
-            ? "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
-            : "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
-        });
+      // Remove existing marker
+      if (markers[id]) markers[id].setMap(null);
+
+      // Create new marker
+      markers[id] = new google.maps.Marker({
+        position: { lat: d.lat, lng: d.lng },
+        map: map,
+        title: `Dustbin ${id}`,
+        icon: d.filled
+          ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+          : "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
       });
     });
   }
+
+
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 11.018, lng: 76.955 },
       zoom: 16,
     });
 
-    loadMapMarkers();
+    updateMapMarkers(); // Load markers
   }
+
 
 </script>
 
