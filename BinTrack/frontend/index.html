@@ -312,23 +312,28 @@ Cleaner cities start with smarter monitoring.</p>
 <script>
   function showTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(tab => {
-      tab.classList.remove('active');
-    });
-    document.getElementById(tabId).classList.add('active');
+        tab.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
 
-    if (tabId === "map-view") {
-        setTimeout(() => initMap(), 200); // Important
-    }
+      if (tabId === "map-view") {
+          setTimeout(() => initMap(), 200);
+      }
   }
 </script>
 
-<!-- Firebase & Dustbin Script -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+
 <script>
   const greenBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-green.png";
   const redBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-red.png";
 
+  // Truck fixed location
+  const truckLocation = { lat: 11.0185, lng: 76.9545 };
+
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCzi2IsDsZE5WIA7KpDgS-0RFs6vxSDqDY",
     authDomain: "brave-design-417105.firebaseapp.com",
@@ -340,15 +345,16 @@ Cleaner cities start with smarter monitoring.</p>
   };
 
   firebase.initializeApp(firebaseConfig);
-  // Using compat version only (no mixing)
-  const truckLocation = { lat: 11.0185, lng: 76.9545 }; // example
   const db = firebase.database();
 
-  let map; 
-  let dustbinLocations = {}; 
-  let markers = {}; 
+  let map;
+  let markers = {};
+  let dustbinLocations = {};
 
-  // For left dashboard UI (single dustbin)
+  let directionsService;
+  let directionsRenderer;
+
+  // UI update for dustbin 001
   db.ref("dustbins/001/filled").on("value", (snapshot) => {
     const filled = snapshot.val();
 
@@ -365,33 +371,22 @@ Cleaner cities start with smarter monitoring.</p>
       filled ? "red" : "green";
   });
 
-
-  // Load all dustbins (for map)
+  // Load full dustbin data
   db.ref("dustbins").on("value", (snapshot) => {
     const data = snapshot.val();
-
-    dustbinLocations = {};
-
-    Object.keys(data).forEach((id) => {
-      dustbinLocations[id] = {
-        lat: data[id].lat,
-        lng: data[id].lng,
-        filled: data[id].filled
-      };
-    });
+    dustbinLocations = data;
 
     updateMapMarkers();
+    findNearestFilled();
   });
 
-
+  // Add/redraw markers
   function updateMapMarkers() {
     Object.keys(dustbinLocations).forEach(id => {
       const d = dustbinLocations[id];
 
-      // Remove existing marker
       if (markers[id]) markers[id].setMap(null);
 
-      // Create new marker
       markers[id] = new google.maps.Marker({
         position: { lat: d.lat, lng: d.lng },
         map: map,
@@ -403,24 +398,75 @@ Cleaner cities start with smarter monitoring.</p>
     });
   }
 
+  // Calculate nearest filled bin
+  function findNearestFilled() {
+    let nearest = null;
+    let minDist = Infinity;
 
+    Object.keys(dustbinLocations).forEach(id => {
+      const d = dustbinLocations[id];
+      if (!d.filled) return;
+
+      const dist = google.maps.geometry.spherical.computeDistanceBetween(
+        new google.maps.LatLng(truckLocation.lat, truckLocation.lng),
+        new google.maps.LatLng(d.lat, d.lng)
+      );
+
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = { id, ...d };
+      }
+    });
+
+    if (nearest) {
+      drawRouteToDustbin(nearest);
+    }
+  }
+
+  // Draw route from truck → dustbin
+  function drawRouteToDustbin(dustbin) {
+    if (!directionsService) {
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer({
+        map: map,
+        suppressMarkers: true
+      });
+    }
+
+    const request = {
+      origin: truckLocation,
+      destination: { lat: dustbin.lat, lng: dustbin.lng },
+      travelMode: google.maps.TravelMode.DRIVING
+    };
+
+    directionsService.route(request, (result, status) => {
+      if (status === "OK") {
+        directionsRenderer.setDirections(result);
+      }
+    });
+  }
+
+  // Initialize map
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 11.018, lng: 76.955 },
+      center: { lat: 11.016, lng: 76.955 },
       zoom: 16,
     });
-    truckMarker = new google.maps.Marker({
+
+    new google.maps.Marker({
       position: truckLocation,
       map: map,
       icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-      title: "Waste Collection Truck"
+      title: "Truck"
     });
-    updateMapMarkers(); // Load markers
+
+    updateMapMarkers();
+    findNearestFilled();
   }
-
-
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBszl7IDU_I-hIJBVwSyAxrZXwpt23kyZg&callback=initMap" defer loading="async"></script>
+<!-- ONLY ONE MAP SCRIPT (IMPORTANT) -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBszl7IDU_I-hIJBVwSyAxrZXwpt23kyZg&libraries=geometry&callback=initMap" defer></script>
+
 </body>
 </html>
