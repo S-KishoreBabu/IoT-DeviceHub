@@ -172,3 +172,49 @@
     border:solid 3px green;
     border-radius: 50%;
 }
+
+#stopsList {
+    width: 100%;
+    max-width: 450px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px -3px rgb(0, 0, 0);
+    margin:10px;
+}
+
+#stopsList h3 {
+    text-align: center;
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.order-table thead {
+    background: linear-gradient(45deg, #ff8080, #ffbf69);
+    color: white;
+}
+
+.order-table th,
+.order-table td {
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.order-table tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.order-table tbody tr:hover {
+    background: #ffe8d6;
+    transition: 0.2s ease;
+}
