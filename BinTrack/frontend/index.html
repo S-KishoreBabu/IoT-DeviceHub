@@ -344,25 +344,26 @@ function findRouteForAllFilled() {
 function drawFullRoute(orderedBins) {
     if (!directionsService) {
         directionsService = new google.maps.DirectionsService();
+    }
+
+    if (!directionsRenderer) {
         directionsRenderer = new google.maps.DirectionsRenderer({
             map: map,
             suppressMarkers: false
         });
     }
 
-    const waypoints = orderedBins.slice(1).map(bin => ({
+    // Build waypoints: All bins
+    const waypoints = orderedBins.map(bin => ({
         location: { lat: bin.lat, lng: bin.lng },
         stopover: true
     }));
 
     const request = {
-        origin: truckLocation,
-        destination: {
-            lat: orderedBins[0].lat,
-            lng: orderedBins[0].lng
-        },
-        waypoints: waypoints,
-        optimizeWaypoints: false,
+        origin: truckLocation,                // START = TRUCK
+        destination: truckLocation,           // END = TRUCK
+        waypoints: waypoints,                 // All bins in between
+        optimizeWaypoints: false,             // We already optimized
         travelMode: google.maps.TravelMode.DRIVING
     };
 
@@ -371,10 +372,11 @@ function drawFullRoute(orderedBins) {
             directionsRenderer.setDirections(result);
             displayOrder(orderedBins);
         } else {
-            console.error("Route error:", status);
+            console.error("Routing failed:", status);
         }
     });
 }
+
 function displayOrder(orderedBins) {
     let msg = "Collection Order:\n";
 
