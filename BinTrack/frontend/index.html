@@ -6,153 +6,6 @@
   <link rel="icon" type="image/png" href="https://ik.imagekit.io/khfpxrcgz/recycle-bin%20(1).png?updatedAt=1748088726617" />
   <title>BinTrack - Smart Dustbin Monitor</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      padding: 0;
-    }
-
-    .rown,.sidebar-header{
-      display: flex;
-      justify-content: left; 
-      margin-left: 10px;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .rown img , .sidebar-header img{
-        margin-right: 10px;  
-        width: 30px;
-        height: 30px;  
-    }
-
-    .rown h2{
-      font-size:larger;
-    }
-    .sidebar-header h2{
-      font-size: larger;
-      font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    }
-
-    .sidebar {
-      width: 200px;
-      background-image: linear-gradient(180deg, rgb(20, 18, 56), rgb(0, 1, 32));
-      color: white;
-      height: 100vh;
-      padding-top: 20px;
-      padding-left: 10px;
-      padding-right: 10px;
-      position: fixed;
-    }
- 
-    .sidebar button {
-      width: 100%;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: white;
-      text-align: left;
-      cursor: pointer;
-      font-size: larger ;
-      border-radius: 8px;
-      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    }
-
-    .sidebar button:hover {
-      background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.227), rgba(255, 255, 255, 0.063));
-    }
-
-    .content {
-      margin-left: 220px;
-      background-color: rgb(255, 255, 255);
-      padding: 20px;
-      flex: 1;
-    }
-
-    .grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 25px;
-      background-color: rgba(0, 98, 255, 0.116);
-      border-radius: 20px;
-
-    }
-
-    .dustbin-card {
-      width: 150px;
-      padding: 10px;
-      background-color: #ffffff;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .dustbin-card img {
-      width: 100px;
-      height: auto;
-    }
-
-    .status.filled {
-      color: red;
-    }
-
-    .status.not-filled {
-      color: green;
-    }
-    
-    #table-view table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #fff;
-    }
-
-    #table-view th, #table-view td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-      font-size: 15px;
-      color: #333;
-    }
-
-    #table-view th {
-      background-color: #c9e4ff;
-      font-weight: 600;
-      color: #000000;
-    }
-
-    #table-view tr:hover {
-      background-color: #f1f3f5;
-    }
-
-    #map-view {
-      width: 100%;
-      height: 600px;
-      margin-top: 20px;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    #map {
-      height: 100%;
-      width: 100%;
-    }
-
-
-    .tab-view {
-      display: none;
-    }
-
-    .tab-view.active {
-      display: block;
-    }
-  </style>
 </head>
 <body>
 
@@ -331,7 +184,7 @@ Cleaner cities start with smarter monitoring.</p>
   const redBin = "https://ik.imagekit.io/khfpxrcgz/dustbin-red.png";
 
   // Truck fixed location
-  const truckLocation = { lat: 11.0185, lng: 76.9545 };
+  const truckLocation = { lat: 10.88964, lng: 76.99225 };
 
   // Firebase config
   const firebaseConfig = {
@@ -446,8 +299,97 @@ Cleaner cities start with smarter monitoring.</p>
     });
   }
 
+  function getOptimizedRoute(filledBins) {
+    const unvisited = [...filledBins];
+    const ordered = [];
+
+    let current = { lat: truckLocation.lat, lng: truckLocation.lng };
+
+    while (unvisited.length > 0) {
+        let nearestIndex = 0;
+        let nearestDist = Infinity;
+
+        unvisited.forEach((bin, index) => {
+            const dist = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(current.lat, current.lng),
+                new google.maps.LatLng(bin.lat, bin.lng)
+            );
+
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestIndex = index;
+            }
+        });
+
+        const next = unvisited.splice(nearestIndex, 1)[0];
+        ordered.push(next);
+        current = { lat: next.lat, lng: next.lng };
+    }
+
+    return ordered;  // fully ordered nearest-neighbour path
+}
+
+
+function findRouteForAllFilled() {
+    const filledBins = Object.keys(dustbinLocations)
+        .map(id => ({ id, ...dustbinLocations[id] }))
+        .filter(b => b.filled);
+
+    if (filledBins.length === 0) return;
+
+    const orderedBins = getOptimizedRoute(filledBins);
+    drawFullRoute(orderedBins);
+}
+
+function drawFullRoute(orderedBins) {
+    if (!directionsService) {
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false
+        });
+    }
+
+    const waypoints = orderedBins.slice(1).map(bin => ({
+        location: { lat: bin.lat, lng: bin.lng },
+        stopover: true
+    }));
+
+    const request = {
+        origin: truckLocation,
+        destination: {
+            lat: orderedBins[0].lat,
+            lng: orderedBins[0].lng
+        },
+        waypoints: waypoints,
+        optimizeWaypoints: false,
+        travelMode: google.maps.TravelMode.DRIVING
+    };
+
+    directionsService.route(request, (result, status) => {
+        if (status === "OK") {
+            directionsRenderer.setDirections(result);
+            displayOrder(orderedBins);
+        } else {
+            console.error("Route error:", status);
+        }
+    });
+}
+function displayOrder(orderedBins) {
+    let msg = "Collection Order:\n";
+
+    orderedBins.forEach((bin, index) => {
+        msg += `${index + 1}. Dustbin ${bin.id}\n`;
+    });
+
+    console.log(msg); // shows in console
+    alert(msg);       // popup window (you can change to UI element later)
+}
+
   // Initialize map
   function initMap() {
+    
+
     map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 11.016, lng: 76.955 },
       zoom: 16,
@@ -460,8 +402,13 @@ Cleaner cities start with smarter monitoring.</p>
       title: "Truck"
     });
 
+    directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
+    
     updateMapMarkers();
-    findNearestFilled();
+    findRouteForAllFilled();
+
+    
   }
 </script>
 
